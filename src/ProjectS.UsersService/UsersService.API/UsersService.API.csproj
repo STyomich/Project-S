@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UsersService.Application\UsersService.Application.csproj" />
+    <ProjectReference Include="..\UsersService.Infrastructure\UsersService.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

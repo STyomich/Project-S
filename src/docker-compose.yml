@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  users.api:
+    build:
+      context: .
+      dockerfile: ProjectS.UsersService/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: Users
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  postgres:
+    image: postgres:16
+    container_name: users_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: Users
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

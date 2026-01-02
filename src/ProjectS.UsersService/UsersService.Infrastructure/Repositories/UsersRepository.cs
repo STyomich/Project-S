@@ -5,7 +5,7 @@ using UsersService.Infrastructure.DbContext;
 
 namespace UsersService.Infrastructure.Repositories;
 
-public class UserRepository(UsersServiceDbContext context) : IUserRepository
+public class UsersRepository(UsersServiceDbContext context) : IUsersRepository
 {
     private readonly UsersServiceDbContext _context = context;
 
@@ -26,10 +26,10 @@ public class UserRepository(UsersServiceDbContext context) : IUserRepository
         return await _context.Users.FirstOrDefaultAsync(u => u.Email!.Value == email.ToLower(), cancellationToken);
     }
 
-    public async Task<User?> GetById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default) => _context.SaveChangesAsync(cancellationToken);
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => _context.SaveChangesAsync(cancellationToken);
 }

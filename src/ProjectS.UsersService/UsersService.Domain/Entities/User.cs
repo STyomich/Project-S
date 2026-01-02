@@ -35,6 +35,14 @@ public class User
         AddDomainEvent(new UserChangedUserNameEvent(Id, oldUserName!, newUserName, Email!.Value));
     }
 
+    public void ChangeEmail(Email newEmail)
+    {
+        var oldEmail = Email;
+        Email = newEmail;
+
+        AddDomainEvent(new UserChangedEmailEvent(Id, UserName!, oldEmail!.Value, newEmail.Value));
+    }
+
     public void ChangeActivation(bool activation)
     {
         IsActive = activation;
