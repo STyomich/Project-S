@@ -3,8 +3,8 @@ version: "3.9"
 services:
   users.api:
     build:
-      context: .
-      dockerfile: ProjectS.UsersService/Dockerfile
+      context: ./ProjectS.UsersService
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     depends_on:
