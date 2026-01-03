@@ -5,6 +5,14 @@ namespace UsersService.Application.Interfaces;
 public interface IUsersService
 {
     /// <summary>
+    /// Logs in a user and returns a JWT token
+    /// </summary>
+    /// <param name="email">Email of the user</param>
+    /// <param name="password">Password of the user</param>
+    /// <returns>JWT token as string</returns>
+    Task<string> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets short info about user by userId
     /// </summary>
     /// <param name="userId">Guid of the user</param>

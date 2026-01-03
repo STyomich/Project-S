@@ -6,9 +6,10 @@ using UsersService.Domain.ValueObjects;
 
 namespace UsersService.Application.Services;
 
-public class UsersService(IUsersRepository usersRepository) : IUsersService
+public class UsersService(IUsersRepository usersRepository, TokenService tokenService) : IUsersService
 {
     private readonly IUsersRepository _usersRepository = usersRepository;
+    private readonly TokenService _tokenService = tokenService;
 
     public async Task DeactivateUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
@@ -41,6 +42,16 @@ public class UsersService(IUsersRepository usersRepository) : IUsersService
         return isExists != null;
     }
 
+    public async Task<string> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
+    {
+        var user = await _usersRepository.GetByEmailAsync(email, cancellationToken);
+        if (user == null || !PasswordService.Verify(user.PasswordHash!, password))
+            throw new InvalidOperationException($"Invalid email or password. Email: {email}, Password: {password}");
+        
+        string token = _tokenService.CreateToken(user);
+        return token;
+    }
+
     public async Task RegisterUserAsync(RegisterUserRequest registerUserRequest, CancellationToken cancellationToken = default)
     {
         var email = Email.Create(registerUserRequest.Email);
@@ -61,7 +72,7 @@ public class UsersService(IUsersRepository usersRepository) : IUsersService
         if (user == null)
             throw new InvalidOperationException($"User with id {request.userId} not found.");
 
-        user.ChangeEmail(email);    
+        user.ChangeEmail(email);
 
         var saveChanges = await _usersRepository.SaveChangesAsync(cancellationToken);
         if (saveChanges == 0)
