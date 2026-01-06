@@ -12,5 +12,7 @@ public interface IUsersRepository
 
     Task DeleteAsync(User user, CancellationToken cancellationToken = default);
 
+    Task<bool> IsExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default);
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

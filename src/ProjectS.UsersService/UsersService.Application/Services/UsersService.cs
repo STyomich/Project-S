@@ -54,13 +54,18 @@ public class UsersService(IUsersRepository usersRepository, TokenService tokenSe
 
     public async Task RegisterUserAsync(RegisterUserRequest registerUserRequest, CancellationToken cancellationToken = default)
     {
+        if(await IsUserExistsByEmailAsync(registerUserRequest.Email, cancellationToken))
+            throw new InvalidOperationException($"User with email {registerUserRequest.Email} already exists.");
+        if(await _usersRepository.IsExistsByUserNameAsync(registerUserRequest.UserName, cancellationToken))
+            throw new InvalidOperationException($"User with username {registerUserRequest.UserName} already exists.");
+
         var email = Email.Create(registerUserRequest.Email);
         var user = new User(email, registerUserRequest.UserName, registerUserRequest.Password.Hash());
 
         await _usersRepository.AddAsync(user, cancellationToken);
         int saveChanges = await _usersRepository.SaveChangesAsync(cancellationToken);
 
-        if (saveChanges == 0)
+        if (saveChanges != 0)
             throw new Exception("Failed to save user.");
     }
 

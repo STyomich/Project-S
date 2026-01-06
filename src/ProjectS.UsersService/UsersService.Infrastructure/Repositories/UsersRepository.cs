@@ -31,5 +31,10 @@ public class UsersRepository(UsersServiceDbContext context) : IUsersRepository
         return await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 
+    public Task<bool> IsExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default)
+    {
+        return _context.Users.AnyAsync(u => u.UserName == userName, cancellationToken);
+    }
+
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => _context.SaveChangesAsync(cancellationToken);
 }
