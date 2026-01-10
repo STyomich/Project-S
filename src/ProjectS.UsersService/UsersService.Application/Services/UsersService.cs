@@ -6,10 +6,11 @@ using UsersService.Domain.ValueObjects;
 
 namespace UsersService.Application.Services;
 
-public class UsersService(IUsersRepository usersRepository, TokenService tokenService) : IUsersService
+public class UsersService(IUsersRepository usersRepository, TokenService tokenService, ICacheService cacheService) : IUsersService
 {
     private readonly IUsersRepository _usersRepository = usersRepository;
     private readonly TokenService _tokenService = tokenService;
+    private readonly ICacheService _cacheService = cacheService;
 
     public async Task DeactivateUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
@@ -24,10 +25,21 @@ public class UsersService(IUsersRepository usersRepository, TokenService tokenSe
 
     public async Task<UserShortInfoDto> GetUserShortInfoAsync(Guid userId, CancellationToken cancellationToken = default)
     {
+        var cacheKey = $"user:{userId}";
+        var cached = await _cacheService.GetAsync<UserShortInfoDto>(cacheKey, cancellationToken);
+        if (cached != null)
+            return cached;
+
         var user = await _usersRepository.GetByIdAsync(userId, cancellationToken);
         if (user == null)
             throw new InvalidOperationException($"User with id {userId} not found.");
 
+        await _cacheService.SetAsync(cacheKey, new UserShortInfoDto
+        (
+            user.Id,
+            user.UserName!,
+            user.Email!.Value
+        ), TimeSpan.FromMinutes(5), cancellationToken);
         return new UserShortInfoDto
         (
             user.Id,
@@ -47,16 +59,16 @@ public class UsersService(IUsersRepository usersRepository, TokenService tokenSe
         var user = await _usersRepository.GetByEmailAsync(email, cancellationToken);
         if (user == null || !PasswordService.Verify(user.PasswordHash!, password))
             throw new InvalidOperationException($"Invalid email or password. Email: {email}, Password: {password}");
-        
+
         string token = _tokenService.CreateToken(user);
         return token;
     }
 
     public async Task RegisterUserAsync(RegisterUserRequest registerUserRequest, CancellationToken cancellationToken = default)
     {
-        if(await IsUserExistsByEmailAsync(registerUserRequest.Email, cancellationToken))
+        if (await IsUserExistsByEmailAsync(registerUserRequest.Email, cancellationToken))
             throw new InvalidOperationException($"User with email {registerUserRequest.Email} already exists.");
-        if(await _usersRepository.IsExistsByUserNameAsync(registerUserRequest.UserName, cancellationToken))
+        if (await _usersRepository.IsExistsByUserNameAsync(registerUserRequest.UserName, cancellationToken))
             throw new InvalidOperationException($"User with username {registerUserRequest.UserName} already exists.");
 
         var email = Email.Create(registerUserRequest.Email);

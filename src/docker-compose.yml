@@ -15,6 +15,17 @@ services:
       POSTGRES_DATABASE: Users
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+  
+  redis:
+    image: redis:latest
+    container_name: projects_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - projects_redis_data:/data
 
   postgres:
     image: postgres:16
@@ -30,4 +41,5 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
+  projects_redis_data:
   postgres_data:
