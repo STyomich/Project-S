@@ -1,6 +1,6 @@
-using UsersService.API.Policies;
+using NotificationsService.API.Policies;
 
-namespace UsersService.API.Extensions;
+namespace NotificationsService.API.Extensions;
 
 public static class ApiServiceExtensions
 {
@@ -8,11 +8,18 @@ public static class ApiServiceExtensions
     {
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowAll", builder =>
+            options.AddPolicy("Allow808X", builder =>
             {
-                builder.AllowAnyOrigin()
-                       .AllowAnyMethod()
-                       .AllowAnyHeader();
+                builder
+                    .SetIsOriginAllowed(origin =>
+                    {
+                        if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                            return false;
+
+                        return uri.Port >= 8080 && uri.Port <= 8089;
+                    })
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
             });
         });
 

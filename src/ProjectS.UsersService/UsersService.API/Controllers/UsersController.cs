@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UsersService.Application.DTO.Users;
 using UsersService.Application.Interfaces;
@@ -17,7 +18,16 @@ public class UsersController(IUsersService usersService) : ControllerBase
         return Ok(user);
     }
 
+    [HttpPost("login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request, CancellationToken cancellationToken)
+    {
+        var token = await _usersService.LoginAsync(request.Email, request.Password, cancellationToken);
+        return Ok(new { Token = token });
+    }
+
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> RegisterUserAsync([FromBody] RegisterUserRequest request, CancellationToken cancellationToken)
     {
         await _usersService.RegisterUserAsync(request, cancellationToken);
@@ -53,6 +63,7 @@ public class UsersController(IUsersService usersService) : ControllerBase
     }
 
     [HttpGet("exists-by-email")]
+    [AllowAnonymous]
     public async Task<IActionResult> IsUserExistsByEmailAsync(string email, CancellationToken cancellationToken)
     {
         var exists = await _usersService.IsUserExistsByEmailAsync(email, cancellationToken);

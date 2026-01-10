@@ -1,7 +1,11 @@
+using System.ComponentModel;
+using Microsoft.Build.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using UsersService.Application.Interfaces;
 using UsersService.Domain.Repositories;
+using UsersService.Infrastructure.Caching.Redis;
 using UsersService.Infrastructure.DbContext;
 using UsersService.Infrastructure.Repositories;
 
@@ -24,7 +28,17 @@ public static class InfrastructureServicesExtensions
                 opt.UseNpgsql(connectionString);
             });
 
+        services.AddStackExchangeRedisCache(options =>
+        {
+            var host = configuration["REDIS_HOST"];
+            var port = configuration["REDIS_PORT"];
+
+            options.Configuration = $"{host}:{port}";
+        });
+
+
         services.AddScoped<IUsersRepository, UsersRepository>();
+        services.AddScoped<ICacheService, RedisCacheService>();
 
         return services;
     }
