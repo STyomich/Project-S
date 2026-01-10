@@ -1,6 +1,15 @@
 version: "3.9"
 
 services:
+  gateway:
+    build:
+      context: ./ProjectS.Gateway
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      USERS_API_URL: http://users.api:8080
+
   users.api:
     build:
       context: ./ProjectS.UsersService
