@@ -9,6 +9,7 @@ services:
       - "5000:5000"
     environment:
       USERS_API_URL: http://users.api:8080
+      TokenKey: "LoremipsumdolorsitametconsecteturadipiscingelitCurabiturauctoridmagnasedegestasNullamquisnequesedrisusmalesuadalaciniaSuspendisseaciniaeratnecexfacilisisinvenenatissapiencondimentumDonecacexacipsumluctuseleifend"
 
   users.api:
     build:
@@ -26,7 +27,8 @@ services:
       POSTGRES_PASSWORD: postgres
       REDIS_HOST: redis
       REDIS_PORT: 6379
-  
+      TokenKey: "LoremipsumdolorsitametconsecteturadipiscingelitCurabiturauctoridmagnasedegestasNullamquisnequesedrisusmalesuadalaciniaSuspendisseaciniaeratnecexfacilisisinvenenatissapiencondimentumDonecacexacipsumluctuseleifend"
+
   redis:
     image: redis:latest
     container_name: projects_redis
