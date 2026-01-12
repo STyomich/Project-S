@@ -57,6 +57,8 @@
       "QuotaExceededMessage": "Too many requests",
       "HttpStatusCode": 429,
       "ClientIdHeader": "X-Forwarded-For"
+<<<<<<<<< Temporary merge branch 1
+=========
     },
     "FileCacheOptions": {
       "TtlSeconds": 30
@@ -69,6 +71,7 @@
     "RetryOptions": {
       "RetryCount": 3,
       "RetryOnServerError": true
+>>>>>>>>> Temporary merge branch 2
     }
   }
 }
