@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using Microsoft.Build.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +5,7 @@ using UsersService.Application.Interfaces;
 using UsersService.Domain.Repositories;
 using UsersService.Infrastructure.Caching.Redis;
 using UsersService.Infrastructure.DbContext;
+using UsersService.Infrastructure.Messaging;
 using UsersService.Infrastructure.Repositories;
 
 namespace UsersService.Infrastructure.Extensions;
@@ -39,6 +38,9 @@ public static class InfrastructureServicesExtensions
 
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<ICacheService, RedisCacheService>();
+
+        services.AddSingleton<RabbitMqConnection>();
+        services.AddSingleton<IEventBus, RabbitMQEventBus>();
 
         return services;
     }
