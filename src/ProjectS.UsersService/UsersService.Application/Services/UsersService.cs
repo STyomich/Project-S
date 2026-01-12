@@ -6,12 +6,12 @@ using UsersService.Domain.ValueObjects;
 
 namespace UsersService.Application.Services;
 
-public class UsersService(IUsersRepository usersRepository, TokenService tokenService, ICacheService cacheService) : IUsersService
+public class UsersService(IUsersRepository usersRepository, TokenService tokenService, ICacheService cacheService, IEventBus eventBus) : IUsersService
 {
     private readonly IUsersRepository _usersRepository = usersRepository;
     private readonly TokenService _tokenService = tokenService;
     private readonly ICacheService _cacheService = cacheService;
-
+    private readonly IEventBus _eventBus = eventBus;
     public async Task DeactivateUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await _usersRepository.GetByIdAsync(userId, cancellationToken);
@@ -90,6 +90,8 @@ public class UsersService(IUsersRepository usersRepository, TokenService tokenSe
             throw new InvalidOperationException($"User with id {request.userId} not found.");
 
         user.ChangeEmail(email);
+
+        await _eventBus.PublishAsync(user.DomainEvents.ToArray(), "user.email.updated");
 
         var saveChanges = await _usersRepository.SaveChangesAsync(cancellationToken);
         if (saveChanges == 0)
