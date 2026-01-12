@@ -57,6 +57,7 @@
       "QuotaExceededMessage": "Too many requests",
       "HttpStatusCode": 429,
       "ClientIdHeader": "X-Forwarded-For"
+<<<<<<< HEAD
     },
     "FileCacheOptions": {
       "TtlSeconds": 30
@@ -69,6 +70,8 @@
     "RetryOptions": {
       "RetryCount": 3,
       "RetryOnServerError": true
+=======
+>>>>>>> a0bf5165adf7071e2121b53400f2de8a12248762
     }
   }
 }
