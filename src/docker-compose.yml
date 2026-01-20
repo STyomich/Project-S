@@ -34,6 +34,21 @@ services:
       RABBITMQ_EXCHANGE: user.exchange
       TokenKey: "LoremipsumdolorsitametconsecteturadipiscingelitCurabiturauctoridmagnasedegestasNullamquisnequesedrisusmalesuadalaciniaSuspendisseaciniaeratnecexfacilisisinvenenatissapiencondimentumDonecacexacipsumluctuseleifend"
 
+  notifications.api:
+    build:
+      context: .
+      dockerfile: ProjectS.NotificationsService/Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: user
+      RABBITMQ_PASSWORD: password
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERS_EXCHANGE: user.exchange
+
   rabbitmq:
     image: rabbitmq:4.2.2-management
     container_name: projects_rabbitmq

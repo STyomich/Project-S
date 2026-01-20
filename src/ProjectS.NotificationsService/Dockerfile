@@ -1,56 +1,46 @@
-# -----------------------------
-# Runtime image
-# -----------------------------
+# =========================
+# Runtime
+# =========================
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
-EXPOSE 8080
 EXPOSE 8081
 
-# -----------------------------
-# Build image
-# -----------------------------
+# =========================
+# Build
+# =========================
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy csproj files first (for Docker cache)
-COPY ["NotificationsService.API/NotificationsService.API.csproj", "NotificationsService.API/"]
-COPY ["NotificationsService.Application/NotificationsService.Application.csproj", "NotificationsService.Application/"]
-COPY ["NotificationsService.Domain/NotificationsService.Domain.csproj", "NotificationsService.Domain/"]
-COPY ["NotificationsService.Infrastructure/NotificationsService.Infrastructure.csproj", "NotificationsService.Infrastructure/"]
+# ---- Copy csproj files (cache-friendly)
+COPY ["ProjectS.NotificationsService/NotificationsService.API/NotificationsService.API.csproj", "ProjectS.NotificationsService/NotificationsService.API/"]
+COPY ["ProjectS.NotificationsService/NotificationsService.Application/NotificationsService.Application.csproj", "ProjectS.NotificationsService/NotificationsService.Application/"]
+COPY ["ProjectS.NotificationsService/NotificationsService.Domain/NotificationsService.Domain.csproj", "ProjectS.NotificationsService/NotificationsService.Domain/"]
+COPY ["ProjectS.NotificationsService/NotificationsService.Infrastructure/NotificationsService.Infrastructure.csproj", "ProjectS.NotificationsService/NotificationsService.Infrastructure/"]
 
-# Restore
-RUN dotnet restore "NotificationsService.API/NotificationsService.API.csproj"
+# 🔹 Shared contracts
+COPY ["Shared/UsersService.Contracts/UsersService.Contracts.csproj", "Shared/UsersService.Contracts/"]
 
-# Copy everything else
+# ---- Restore
+RUN dotnet restore "ProjectS.NotificationsService/NotificationsService.API/NotificationsService.API.csproj"
+
+# ---- Copy everything
 COPY . .
 
-# Build
-WORKDIR "/src/UsersService.API"
-RUN dotnet build "UsersService.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+# ---- Build
+WORKDIR "/src/ProjectS.NotificationsService/NotificationsService.API"
+RUN dotnet build -c $BUILD_CONFIGURATION -o /app/build
 
-# -----------------------------
+# =========================
 # Publish
-# -----------------------------
+# =========================
 FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "UsersService.API.csproj" \
-    -c $BUILD_CONFIGURATION \
-    -o /app/publish \
-    /p:UseAppHost=false
+RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
-# -----------------------------
-# Final image
-# -----------------------------
+# =========================
+# Final
+# =========================
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-
-# Environment variables (PostgreSQL)
-ENV POSTGRES_HOST=localhost
-ENV POSTGRES_PASSWORD=admin
-ENV POSTGRES_DATABASE=UsersService
-ENV POSTGRES_USER=postgres
-ENV POSTGRES_PORT=5432
-
-ENTRYPOINT ["dotnet", "UsersService.API.dll"]
+ENTRYPOINT ["dotnet", "NotificationsService.API.dll"]
