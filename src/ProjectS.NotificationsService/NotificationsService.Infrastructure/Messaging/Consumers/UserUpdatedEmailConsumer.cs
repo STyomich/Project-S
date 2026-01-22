@@ -2,7 +2,6 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NotificationsService.Application.Consumers;
 using NotificationsService.Application.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -17,6 +16,7 @@ namespace NotificationsService.Infrastructure.Messaging.Consumers
         private readonly RabbitMqConnection _connection;
         private readonly string _exchange;
         private readonly ILogger<UserUpdatedEmailConsumer> _logger;
+        private IChannel? _channel;
 
         public UserUpdatedEmailConsumer(
             RabbitMqConnection connection,
@@ -24,22 +24,19 @@ namespace NotificationsService.Infrastructure.Messaging.Consumers
             ILogger<UserUpdatedEmailConsumer> logger)
         {
             _connection = connection;
-            _exchange = config["RABBITMQ_EXCHANGE"] ?? "user";
+            _exchange = config["RABBITMQ_USERS_EXCHANGE"] ?? "user.exchange";
             _logger = logger;
         }
 
-        public async Task ConsumeAsync(
-            UserUpdatedEmailEvent @event,
-            EventContext context,
-            CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             string routingKey = RoutingKey;
             string queueName = QueueName;
 
-            await using var _channel = await _connection.GetChannelAsync();
+            _channel = await _connection.GetChannelAsync();
 
             //Create exchange
-            await _channel.ExchangeDeclareAsync(exchange: _exchange, type: ExchangeType.Direct, durable: true);
+            await _channel.ExchangeDeclareAsync(exchange: _exchange, type: ExchangeType.Topic, durable: true);
 
             //Create message queue
             await _channel.QueueDeclareAsync(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null); //x-message-ttl | x-max-length | x-expired 
@@ -63,6 +60,11 @@ namespace NotificationsService.Infrastructure.Messaging.Consumers
             };
 
             await _channel.BasicConsumeAsync(queue: queueName, consumer: consumer, autoAck: true);
+        }
+
+        public async ValueTask StopAsync()
+        {
+            await _connection.DisposeAsync();
         }
     }
 }

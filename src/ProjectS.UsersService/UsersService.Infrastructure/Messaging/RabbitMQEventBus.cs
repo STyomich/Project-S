@@ -16,7 +16,7 @@ public sealed class RabbitMQEventBus : IEventBus
         IConfiguration config)
     {
         _connection = connection;
-        _exchange = config["RABBITMQ_EXCHANGE"] ?? "user";
+        _exchange = config["RABBITMQ_EXCHANGE"] ?? "user.exchange";
     }
 
     public async Task PublishAsync<T>(T @event, string routingKey)

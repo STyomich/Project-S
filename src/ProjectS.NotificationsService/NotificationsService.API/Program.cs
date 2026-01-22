@@ -12,4 +12,4 @@ app.UseCors("Allow808X");
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

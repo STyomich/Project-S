@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using NotificationsService.Application.Consumers;
+using NotificationsService.Infrastructure.Messaging;
 
 namespace NotificationsService.Application.Interfaces;
 
@@ -21,8 +17,10 @@ public interface IEventConsumer<in TEvent>
     /// <summary>
     /// Handle incoming event.
     /// </summary>
-    Task ConsumeAsync(
-        TEvent @event,
-        EventContext context,
-        CancellationToken cancellationToken = default);
+    Task StartAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Dispose resources.
+    /// </summary>
+    ValueTask StopAsync();
 }
