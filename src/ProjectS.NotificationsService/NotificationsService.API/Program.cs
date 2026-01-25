@@ -10,6 +10,8 @@ var app = builder.Build();
 
 app.UseCors("Allow808X");
 
+app.UseCustomMiddlewares();
+
 app.MapControllers();
 
 await app.RunAsync();

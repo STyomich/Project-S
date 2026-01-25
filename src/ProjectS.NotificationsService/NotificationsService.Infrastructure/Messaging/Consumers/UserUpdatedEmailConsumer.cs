@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NotificationsService.Application.Interfaces;
+using NotificationsService.Domain.Enums;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using UsersService.Contracts.Events;
@@ -17,15 +18,17 @@ namespace NotificationsService.Infrastructure.Messaging.Consumers
         private readonly string _exchange;
         private readonly ILogger<UserUpdatedEmailConsumer> _logger;
         private IChannel? _channel;
+        private readonly INotificationsService _notificationsService;
 
         public UserUpdatedEmailConsumer(
             RabbitMqConnection connection,
             IConfiguration config,
-            ILogger<UserUpdatedEmailConsumer> logger)
+            ILogger<UserUpdatedEmailConsumer> logger, INotificationsService notificationsService)
         {
             _connection = connection;
             _exchange = config["RABBITMQ_USERS_EXCHANGE"] ?? "user.exchange";
             _logger = logger;
+            _notificationsService = notificationsService;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -54,6 +57,8 @@ namespace NotificationsService.Infrastructure.Messaging.Consumers
                 if (message != null)
                 {
                     var userEmailUpdatedMessage = JsonSerializer.Deserialize<UserUpdatedEmailEvent>(message);
+
+                    await _notificationsService.SaveNotificationAsync(userEmailUpdatedMessage!.UserId, userEmailUpdatedMessage.OldEmail, $"Email was updated from {userEmailUpdatedMessage.OldEmail} to {userEmailUpdatedMessage.NewEmail}", NotificationStatus.Info);
 
                     _logger.LogInformation($"User email updated: {userEmailUpdatedMessage!.UserId}, Old email: {userEmailUpdatedMessage.OldEmail}, New email: {userEmailUpdatedMessage.NewEmail}");
                 }
