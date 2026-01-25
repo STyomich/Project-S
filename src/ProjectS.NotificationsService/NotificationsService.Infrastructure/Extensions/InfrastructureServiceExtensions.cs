@@ -1,9 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NotificationsService.Application.Interfaces;
 using NotificationsService.Domain.Repositories;
+using NotificationsService.Infrastructure.Messaging;
+using NotificationsService.Infrastructure.Messaging.Consumers;
+using NotificationsService.Infrastructure.Messaging.Consumers.HostedServices;
 using NotificationsService.Infrastructure.Persistence;
 using NotificationsService.Infrastructure.Repositories;
+using UsersService.Contracts.Events;
 
 namespace NotificationsService.Infrastructure.Extensions;
 
@@ -23,7 +28,13 @@ public static class InfrastructureServiceExtensions
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
         });
 
+        services.AddSingleton<RabbitMqConnection>();
+        services.AddSingleton<IEventBus, RabbitMQEventBus>();
+
         services.AddScoped<INotificationsRepository, NotificationsRepository>();
+        services.AddTransient<IEventConsumer<UserUpdatedEmailEvent>, UserUpdatedEmailConsumer>();
+
+        services.AddHostedService<UserUpdatedEmailHostedService>();
 
         return services;
     }

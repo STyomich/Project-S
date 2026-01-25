@@ -1,10 +1,10 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using NotificationsService.Application.Interfaces;
 using RabbitMQ.Client;
-using UsersService.Application.Interfaces;
 
-namespace UsersService.Infrastructure.Messaging;
+namespace NotificationsService.Infrastructure.Messaging;
 
 public sealed class RabbitMQEventBus : IEventBus
 {
@@ -16,7 +16,7 @@ public sealed class RabbitMQEventBus : IEventBus
         IConfiguration config)
     {
         _connection = connection;
-        _exchange = config["RABBITMQ_EXCHANGE"] ?? "user.exchange";
+        _exchange = config["RABBITMQ_EXCHANGE"] ?? "user";
     }
 
     public async Task PublishAsync<T>(T @event, string routingKey)

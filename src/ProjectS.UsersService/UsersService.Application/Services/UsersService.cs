@@ -1,6 +1,7 @@
 using UsersService.Application.DTO.Users;
 using UsersService.Application.Interfaces;
 using UsersService.Domain.Entities;
+using UsersService.Domain.Events;
 using UsersService.Domain.Repositories;
 using UsersService.Domain.ValueObjects;
 
@@ -91,7 +92,12 @@ public class UsersService(IUsersRepository usersRepository, TokenService tokenSe
 
         user.ChangeEmail(email);
 
-        await _eventBus.PublishAsync(user.DomainEvents.ToArray(), "user.email.updated");
+        var domainEvent = user.DomainEvents
+            .OfType<UserChangedEmailEvent>()
+            .Single();
+
+        await _eventBus.PublishAsync(domainEvent, "user.email.updated");
+
 
         var saveChanges = await _usersRepository.SaveChangesAsync(cancellationToken);
         if (saveChanges == 0)
