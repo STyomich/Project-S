@@ -15,7 +15,7 @@ public class NotificationServiceDbContextFactory : IDesignTimeDbContextFactory<N
         var optionsBuilder = new DbContextOptionsBuilder<NotificationsDbContext>();
         // LOCAL DEV connection (used ONLY for migrations)
         var connectionString =
-            "Server=localhost;Port=3306;Database=NotificationsDb;User=root;Password=password;"; // temporarilly harcoded
+            "Server=localhost;Port=3306;Database=Notifications;User=user;Password=password;"; // temporarilly harcoded
 
         optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
