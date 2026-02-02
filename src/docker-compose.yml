@@ -115,7 +115,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - utilities_mongodb_data:/data/db
+      - mongodb_data:/data/db
 
 volumes:
   projects_redis_data:

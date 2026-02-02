@@ -5,7 +5,9 @@ using UsersService.Application.Interfaces;
 using UsersService.Domain.Repositories;
 using UsersService.Infrastructure.Caching.Redis;
 using UsersService.Infrastructure.DbContext;
+using UsersService.Infrastructure.Interceptors;
 using UsersService.Infrastructure.Messaging;
+using UsersService.Infrastructure.Outbox;
 using UsersService.Infrastructure.Repositories;
 
 namespace UsersService.Infrastructure.Extensions;
@@ -22,9 +24,10 @@ public static class InfrastructureServicesExtensions
           .Replace("$POSTGRES_PORT", Environment.GetEnvironmentVariable("POSTGRES_PORT"))
           .Replace("$POSTGRES_USER", Environment.GetEnvironmentVariable("POSTGRES_USER"));
 
-        services.AddDbContext<UsersServiceDbContext>(opt =>
+        services.AddDbContext<UsersServiceDbContext>((sp, options) =>
             {
-                opt.UseNpgsql(connectionString);
+                options.UseNpgsql(connectionString);
+                options.AddInterceptors(sp.GetRequiredService<OutboxSaveChangesInterceptor>());
             });
 
         services.AddStackExchangeRedisCache(options =>
@@ -35,6 +38,8 @@ public static class InfrastructureServicesExtensions
             options.Configuration = $"{host}:{port}";
         });
 
+        services.AddSingleton<OutboxSaveChangesInterceptor>();
+        services.AddHostedService<OutboxProcessor>();
 
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<ICacheService, RedisCacheService>();

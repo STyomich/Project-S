@@ -1,13 +1,11 @@
 using UsersService.Domain.Events;
+using UsersService.Domain.Primitives;
 using UsersService.Domain.ValueObjects;
 
 namespace UsersService.Domain.Entities;
 
-public class User
+public class User : AggregateRoot
 {
-    private readonly List<object> _domainEvents = [];
-    public IReadOnlyCollection<object> DomainEvents => _domainEvents;
-
     public Guid Id { get; private set; }
     public Email? Email { get; private set; }
     public string? UserName { get; private set; }
@@ -24,7 +22,7 @@ public class User
         PasswordHash = passwordHash;
         IsActive = false;
 
-        AddDomainEvent(new UserCreatedEvent(Id, Email.Value, UserName));
+        RaiseDomainEvent(new UserCreatedEvent(Id, Email.Value, UserName));
     }
 
     public void ChangeUserName(string newUserName)
@@ -32,7 +30,7 @@ public class User
         var oldUserName = UserName;
         UserName = newUserName;
 
-        AddDomainEvent(new UserChangedUserNameEvent(Id, oldUserName!, newUserName, Email!.Value));
+        RaiseDomainEvent(new UserChangedUserNameEvent(Id, oldUserName!, newUserName, Email!.Value));
     }
 
     public void ChangeEmail(Email newEmail)
@@ -40,26 +38,20 @@ public class User
         var oldEmail = Email;
         Email = newEmail;
 
-        AddDomainEvent(new UserChangedEmailEvent(Id, UserName!, oldEmail!.Value, newEmail.Value));
+        RaiseDomainEvent(new UserChangedEmailEvent(Id, UserName!, oldEmail!.Value, newEmail.Value));
     }
 
     public void ChangeActivation(bool activation)
     {
         IsActive = activation;
 
-        AddDomainEvent(new UserActivationChangedEvent(Id, UserName!, Email!.Value, IsActive));
+        RaiseDomainEvent(new UserActivationChangedEvent(Id, UserName!, Email!.Value, IsActive));
     }
 
     public void ChangePassword(string newPasswordHash)
     {
         PasswordHash = newPasswordHash;
 
-        AddDomainEvent(new UserChangedPasswordEvent(Id, UserName!, Email!.Value));
+        RaiseDomainEvent(new UserChangedPasswordEvent(Id, UserName!, Email!.Value));
     }
-
-    private void AddDomainEvent(object @event)
-        => _domainEvents.Add(@event);
-
-    public void ClearDomainEvents()
-        => _domainEvents.Clear();
 }

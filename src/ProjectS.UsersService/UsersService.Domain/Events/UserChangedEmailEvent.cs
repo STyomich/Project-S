@@ -1,3 +1,5 @@
+using UsersService.Domain.Interfaces;
+
 namespace UsersService.Domain.Events;
 
 public record UserChangedEmailEvent(
@@ -5,4 +7,7 @@ public record UserChangedEmailEvent(
     string UserName,
     string OldEmail,
     string NewEmail
-);
+) : IDomainEvent
+{
+    public DateTime OccurredOnUtc { get; } = DateTime.UtcNow;
+}
