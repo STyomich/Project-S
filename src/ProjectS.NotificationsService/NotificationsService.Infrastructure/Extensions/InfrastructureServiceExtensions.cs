@@ -25,7 +25,7 @@ public static class InfrastructureServiceExtensions
           .Replace("$MYSQL_USER", Environment.GetEnvironmentVariable("MYSQL_USER"));
         services.AddDbContext<NotificationsDbContext>(options =>
         {
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 0)));
         });
 
         services.AddSingleton<RabbitMqConnection>();

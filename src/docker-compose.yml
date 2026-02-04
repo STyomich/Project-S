@@ -44,7 +44,13 @@ services:
       - "8081:8081"
     depends_on:
       - rabbitmq
+      - mysql
     environment:
+      MYSQL_HOST: mysql
+      MYSQL_DATABASE: Notifications
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: user
       RABBITMQ_PASSWORD: password
@@ -84,6 +90,35 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  mysql:
+    image: mysql:8.0
+    container_name: notifications_mysql
+    restart: always
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_DATABASE: Notifications
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    
+  mongodb:
+    image: mongo:8.2.3-noble
+    container_name: utilities_mongodb
+    restart: always
+    environment:
+      MONGODB_CONNECTION_STRING: mongodb://mongo:27017
+      MONGODB_DATABASE: Utilities
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
 volumes:
   projects_redis_data:
   postgres_data:
+  mysql_data:
+  mongodb_data:
