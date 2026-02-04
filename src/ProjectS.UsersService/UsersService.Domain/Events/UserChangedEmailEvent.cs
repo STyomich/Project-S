@@ -10,4 +10,5 @@ public record UserChangedEmailEvent(
 ) : IDomainEvent
 {
     public DateTime OccurredOnUtc { get; } = DateTime.UtcNow;
+    public string RoutingKey { get; } = "user.email.changed";
 }

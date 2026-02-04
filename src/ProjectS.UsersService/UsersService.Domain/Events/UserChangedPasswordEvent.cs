@@ -5,4 +5,5 @@ namespace UsersService.Domain.Events;
 public sealed record UserChangedPasswordEvent(Guid userId, string userName, string email) : IDomainEvent
 {
     public DateTime OccurredOnUtc { get; } = DateTime.UtcNow;
+    public string RoutingKey { get; } = "user.password.changed";
 }

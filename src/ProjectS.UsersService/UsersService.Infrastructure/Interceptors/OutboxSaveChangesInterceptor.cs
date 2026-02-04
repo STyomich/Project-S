@@ -1,5 +1,7 @@
+using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using RabbitMQ.Client;
 using UsersService.Domain.Primitives;
 using UsersService.Infrastructure.Outbox;
 
@@ -27,11 +29,9 @@ public class OutboxSaveChangesInterceptor : SaveChangesInterceptor
             .Select(domainEvent => new OutboxMessage
             {
                 OccurredOnUtc = domainEvent.OccurredOnUtc,
-                Type = domainEvent.GetType().FullName!,
-                Content = JsonSerializer.Serialize(
-                    domainEvent,
-                    domainEvent.GetType()
-                )
+                Type = ExchangeType.Topic,
+                RoutingKey = domainEvent.RoutingKey,
+                Content = JsonSerializer.Serialize(domainEvent)
             })
             .ToList();
 

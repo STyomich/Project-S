@@ -49,4 +49,25 @@ public sealed class RabbitMQEventBus : IEventBus
             cancellationToken: cancellationToken
         );
     }
+
+    public async Task PublishAsync(string eventType, string payload, string routingKey, CancellationToken cancellationToken = default)
+    {
+        await using var channel = await _connection.GetChannelAsync();
+
+        var body = Encoding.UTF8.GetBytes(payload);
+
+        var properties = new BasicProperties
+        {
+            Type = eventType,
+            Persistent = true
+        };
+        
+        await channel.BasicPublishAsync(
+            exchange: _exchange,
+            routingKey: routingKey,
+            basicProperties: properties,
+            mandatory: false,
+            body: body,
+            cancellationToken: cancellationToken);
+    }
 }
