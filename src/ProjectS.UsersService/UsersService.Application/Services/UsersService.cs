@@ -96,12 +96,11 @@ public class UsersService(IUsersRepository usersRepository, TokenService tokenSe
             .OfType<UserChangedEmailEvent>()
             .Single();
 
-        await _eventBus.PublishAsync(domainEvent, "user.email.updated");
-
-
         var saveChanges = await _usersRepository.SaveChangesAsync(cancellationToken);
         if (saveChanges == 0)
             throw new Exception("Failed to update user email.");
+
+        await _eventBus.PublishAsync(domainEvent, "user.email.updated");
     }
 
     public async Task UpdateUserNameAsync(UpdateUserNameRequest request, CancellationToken cancellationToken = default)

@@ -17,34 +17,39 @@ public class OutboxProcessor : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var scope = _scopeFactory.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<UsersServiceDbContext>();
-        var bus = scope.ServiceProvider.GetRequiredService<IEventBus>();
-
-        var messages = await db.OutboxMessages
-            .Where(x => x.ProcessedOnUtc == null)
-            .OrderBy(x => x.OccurredOnUtc)
-            .Take(20)
-            .ToListAsync(stoppingToken);
-
-        foreach (var message in messages)
+        while (!stoppingToken.IsCancellationRequested)
         {
-            try
-            {
-                await bus.PublishAsync(
-                    eventType: message.Type,
-                    payload: message.Content,
-                    routingKey: message.RoutingKey,
-                    cancellationToken: stoppingToken);
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<UsersServiceDbContext>();
+            var bus = scope.ServiceProvider.GetRequiredService<IEventBus>();
 
-                message.ProcessedOnUtc = DateTime.UtcNow;
-            }
-            catch (Exception ex)
+            var messages = await db.OutboxMessages
+                .Where(x => x.ProcessedOnUtc == null)
+                .OrderBy(x => x.OccurredOnUtc)
+                .Take(20)
+                .ToListAsync(stoppingToken);
+
+            foreach (var message in messages)
             {
-                message.Error = ex.Message;
+                try
+                {
+                    await bus.PublishAsync(
+                        message.Type,
+                        message.Content,
+                        message.RoutingKey,
+                        stoppingToken);
+
+                    message.ProcessedOnUtc = DateTime.UtcNow;
+                }
+                catch (Exception ex)
+                {
+                    message.Error = ex.Message;
+                }
             }
+
+            await db.SaveChangesAsync(stoppingToken);
+
+            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
         }
-
-        await db.SaveChangesAsync(stoppingToken);
     }
 }

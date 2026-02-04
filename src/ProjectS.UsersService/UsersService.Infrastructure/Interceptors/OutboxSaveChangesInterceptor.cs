@@ -22,7 +22,7 @@ public class OutboxSaveChangesInterceptor : SaveChangesInterceptor
             .Entries<AggregateRoot>()
             .SelectMany(entry =>
             {
-                var events = entry.Entity.DomainEvents;
+                var events = entry.Entity.DomainEvents.ToList();
                 entry.Entity.ClearDomainEvents();
                 return events;
             })

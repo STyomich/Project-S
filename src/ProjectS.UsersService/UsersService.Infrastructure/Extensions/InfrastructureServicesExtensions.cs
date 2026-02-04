@@ -26,8 +26,8 @@ public static class InfrastructureServicesExtensions
 
         services.AddDbContext<UsersServiceDbContext>((sp, options) =>
             {
-                options.UseNpgsql(connectionString);
-                options.AddInterceptors(sp.GetRequiredService<OutboxSaveChangesInterceptor>());
+                var interceptor = sp.GetRequiredService<OutboxSaveChangesInterceptor>();
+                options.UseNpgsql(connectionString).AddInterceptors(interceptor);
             });
 
         services.AddStackExchangeRedisCache(options =>
