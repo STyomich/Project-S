@@ -1,10 +1,9 @@
+using UtilitiesService.Domain.Primitives;
+
 namespace UtilitiesService.Domain.Entities;
 
-public sealed class Utility
+public sealed class Utility : AggregateRoot
 {
-    private readonly List<object> _domainEvents = [];
-    public IReadOnlyCollection<object> DomainEvents => _domainEvents;
-
     public Guid Id { get; private set; }
     public Guid UserId { get; private set; }
     public string? Name { get; private set; }
@@ -23,10 +22,4 @@ public sealed class Utility
 
         //AddDomainEvent(new UtilityCreatedEvent(Id, UserId, Name, Description, CostPerHour));
     }
-
-    private void AddDomainEvent(object @event)
-        => _domainEvents.Add(@event);
-
-    public void ClearDomainEvents()
-        => _domainEvents.Clear();
 }
