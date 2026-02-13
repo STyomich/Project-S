@@ -31,7 +31,7 @@ public class OutboxSaveChangesInterceptor : SaveChangesInterceptor
                 OccurredOnUtc = domainEvent.OccurredOnUtc,
                 Type = ExchangeType.Topic,
                 RoutingKey = domainEvent.RoutingKey,
-                Content = JsonSerializer.Serialize(domainEvent)
+                Content = JsonSerializer.Serialize(domainEvent, domainEvent.GetType())
             })
             .ToList();
 
