@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { UsersService } from '../../../features/users/services/users.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -9,10 +11,11 @@ import { UsersService } from '../../../features/users/services/users.service';
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
-export class Navbar implements OnInit {
+export class Navbar implements OnInit, OnDestroy {
   isLoggedIn = false;
   userName: string | null = null;
   isDropdownOpen = false;
+  private destroy$ = new Subject<void>();
 
   constructor(private usersService: UsersService) {}
 
@@ -20,11 +23,23 @@ export class Navbar implements OnInit {
     this.checkAuthStatus();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   checkAuthStatus(): void {
     this.isLoggedIn = this.usersService.isLoggedIn();
-    // In a real app, you might fetch user info from the API or localStorage
-    const storedUserName = localStorage.getItem('userName');
-    this.userName = storedUserName || 'User';
+
+    if (this.isLoggedIn) {
+      // Subscribe to current user observable
+      this.usersService
+        .getCurrentUser()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((user) => {
+          this.userName = user?.userName || 'User';
+        });
+    }
   }
 
   toggleDropdown(): void {
@@ -40,8 +55,6 @@ export class Navbar implements OnInit {
     this.isLoggedIn = false;
     this.userName = null;
     this.isDropdownOpen = false;
-    // Navigate to home or login page
     window.location.href = '/';
   }
 }
-

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UsersService.Application.DTO.Users;
@@ -8,14 +9,15 @@ namespace UsersService.API.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/[controller]")]
-public class UsersController(IUsersService usersService) : ControllerBase
+public class UsersController(IUsersService usersService, IHttpContextAccessor httpContextAccessor) : ControllerBase
 {
     private readonly IUsersService _usersService = usersService;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     [HttpGet("{userId:guid}")]
     public async Task<IActionResult> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
-        var user =  await _usersService.GetUserShortInfoAsync(userId, cancellationToken);
+        var user = await _usersService.GetUserShortInfoAsync(userId, cancellationToken);
         return Ok(user);
     }
 
@@ -33,6 +35,14 @@ public class UsersController(IUsersService usersService) : ControllerBase
     {
         await _usersService.RegisterUserAsync(request, cancellationToken);
         return NoContent();
+    }
+
+    [HttpGet("current")]
+    public async Task<IActionResult> GetCurrentUserInfoAsync(CancellationToken cancellationToken)
+    {
+        var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var user = await _usersService.GetUserShortInfoAsync(Guid.Parse(userId!), cancellationToken);
+        return Ok(user);
     }
 
     [HttpPatch("update-username")]
