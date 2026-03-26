@@ -20,7 +20,13 @@ export class Navbar implements OnInit, OnDestroy {
   constructor(private usersService: UsersService) {}
 
   ngOnInit(): void {
-    this.checkAuthStatus();
+    this.usersService
+      .getCurrentUser()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((user) => {
+        this.isLoggedIn = !!user;
+        this.userName = user?.userName || 'User';
+      });
   }
 
   ngOnDestroy(): void {

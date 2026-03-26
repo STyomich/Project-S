@@ -24,7 +24,7 @@ export class UsersService {
 
   // Fetch all users short info
   getUserShortInfo() {
-    return this.http.get<UserShortInfo[]>(API_URL + '/users/short-info');
+    return this.http.get<UserShortInfo>(API_URL + '/users/short-info');
   }
 
   // Get current logged-in user (observable)
