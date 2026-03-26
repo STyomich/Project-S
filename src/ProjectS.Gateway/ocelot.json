@@ -5,7 +5,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [{ "Host": "users.api", "Port": 8080 }],
       "UpstreamPathTemplate": "/api/users/login",
-      "UpstreamHttpMethod": ["POST"],
+      "UpstreamHttpMethod": ["OPTIONS", "POST"],
 
       "AuthenticationOptions": {
         "AllowAnonymous": true
@@ -23,6 +23,17 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/api/users/current",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [{ "Host": "users.api", "Port": 8080 }],
+      "UpstreamPathTemplate": "/api/users/current",
+      "UpstreamHttpMethod": ["GET"],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
       "DownstreamPathTemplate": "/api/users/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -32,7 +43,14 @@
         }
       ],
       "UpstreamPathTemplate": "/api/users/{everything}",
-      "UpstreamHttpMethod": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS"
+      ],
 
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
