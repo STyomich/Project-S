@@ -9,4 +9,6 @@ public sealed class OutboxMessage
     public string Content { get; init; } = default!;
     public DateTime? ProcessedOnUtc { get; set; }
     public string? Error { get; set; }
+    public int? AttemptCount { get; set; } = default;
+    public DateTime? FailedOnUtc { get; set; }
 }
