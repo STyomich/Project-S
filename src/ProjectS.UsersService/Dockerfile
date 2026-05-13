@@ -14,19 +14,19 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copy csproj files first (for Docker cache)
-COPY ["UsersService.API/UsersService.API.csproj", "UsersService.API/"]
-COPY ["UsersService.Application/UsersService.Application.csproj", "UsersService.Application/"]
-COPY ["UsersService.Domain/UsersService.Domain.csproj", "UsersService.Domain/"]
-COPY ["UsersService.Infrastructure/UsersService.Infrastructure.csproj", "UsersService.Infrastructure/"]
+COPY ["ProjectS.UsersService/UsersService.API/UsersService.API.csproj", "ProjectS.UsersService/UsersService.API/"]
+COPY ["ProjectS.UsersService/UsersService.Application/UsersService.Application.csproj", "ProjectS.UsersService/UsersService.Application/"]
+COPY ["ProjectS.UsersService/UsersService.Domain/UsersService.Domain.csproj", "ProjectS.UsersService/UsersService.Domain/"]
+COPY ["ProjectS.UsersService/UsersService.Infrastructure/UsersService.Infrastructure.csproj", "ProjectS.UsersService/UsersService.Infrastructure/"]
 
 # Restore
-RUN dotnet restore "UsersService.API/UsersService.API.csproj"
+RUN dotnet restore "ProjectS.UsersService/UsersService.API/UsersService.API.csproj"
 
 # Copy everything else
 COPY . .
 
 # Build
-WORKDIR "/src/UsersService.API"
+WORKDIR "/src/ProjectS.UsersService/UsersService.API"
 RUN dotnet build "UsersService.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # -----------------------------
@@ -34,6 +34,7 @@ RUN dotnet build "UsersService.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 # -----------------------------
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
+WORKDIR "/src/ProjectS.UsersService/UsersService.API"
 RUN dotnet publish "UsersService.API.csproj" \
     -c $BUILD_CONFIGURATION \
     -o /app/publish \

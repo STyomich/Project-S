@@ -8,6 +8,7 @@ public class UsersServiceDbContext(DbContextOptions<UsersServiceDbContext> optio
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<BlobInfo> BlobInfos => Set<BlobInfo>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

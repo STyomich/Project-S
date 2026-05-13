@@ -35,6 +35,7 @@ RUN dotnet build -c $BUILD_CONFIGURATION -o /app/build
 # Publish
 # =========================
 FROM build AS publish
+WORKDIR "/src/ProjectS.NotificationsService/NotificationsService.API"
 RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
 # =========================

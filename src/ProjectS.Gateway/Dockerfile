@@ -13,16 +13,17 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copy csproj first (for Docker cache)
-COPY ProjectS.Gateway.csproj ./
+COPY ["ProjectS.Gateway/ProjectS.Gateway.csproj", "ProjectS.Gateway/"]
 
 # Restore
-RUN dotnet restore ProjectS.Gateway.csproj
+RUN dotnet restore "ProjectS.Gateway/ProjectS.Gateway.csproj"
 
 # Copy everything else
 COPY . .
 
 # Build
-RUN dotnet build ProjectS.Gateway.csproj \
+WORKDIR "/src/ProjectS.Gateway"
+RUN dotnet build "ProjectS.Gateway.csproj" \
     -c $BUILD_CONFIGURATION \
     -o /app/build
 
@@ -31,7 +32,8 @@ RUN dotnet build ProjectS.Gateway.csproj \
 # -----------------------------
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish ProjectS.Gateway.csproj \
+WORKDIR "/src/ProjectS.Gateway"
+RUN dotnet publish "ProjectS.Gateway.csproj" \
     -c $BUILD_CONFIGURATION \
     -o /app/publish \
     /p:UseAppHost=false

@@ -7,6 +7,7 @@ namespace UsersService.Domain.Entities;
 public class User : AggregateRoot
 {
     public Guid Id { get; private set; }
+    public Guid? AvatarId { get; private set; }
     public Email? Email { get; private set; }
     public string? UserName { get; private set; }
     public string? PasswordHash { get; private set; }
@@ -14,9 +15,10 @@ public class User : AggregateRoot
 
     private User() { } // required for ORM
 
-    public User(Email email, string userName, string passwordHash)
+    public User(Guid? avatarId, Email email, string userName, string passwordHash)
     {
         Id = Guid.NewGuid();
+        AvatarId = avatarId;
         Email = email;
         UserName = userName;
         PasswordHash = passwordHash;

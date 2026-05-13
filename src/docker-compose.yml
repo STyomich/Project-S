@@ -22,6 +22,8 @@ services:
       - rabbitmq
       - redis
     environment:
+      AZURE_BLOB_STORAGE_CONNECTION_STRING: ""
+      AZURE_BLOB_STORAGE_CONTAINER_NAME: "projectsimages"
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_DATABASE: Users
