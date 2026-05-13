@@ -73,7 +73,7 @@ public class UsersService(IUsersRepository usersRepository, TokenService tokenSe
             throw new InvalidOperationException($"User with username {registerUserRequest.UserName} already exists.");
 
         var email = Email.Create(registerUserRequest.Email);
-        var user = new User(email, registerUserRequest.UserName, registerUserRequest.Password.Hash());
+        var user = new User(avatarId: null, email, registerUserRequest.UserName, registerUserRequest.Password.Hash());
 
         await _usersRepository.AddAsync(user, cancellationToken);
         int saveChanges = await _usersRepository.SaveChangesAsync(cancellationToken);

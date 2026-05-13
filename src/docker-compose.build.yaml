@@ -1,0 +1,152 @@
+services:
+  postgres-container:
+    image: project-s-postgres:latest
+    build:
+      context: ./postgres
+      dockerfile: ./Dockerfile
+    ports:
+      - "5432:5432"
+    networks:
+      - users-postgres-networks
+  mongodb-container:
+    image: project-s-mongodb:latest
+    build:
+      context: ./mongodb
+      dockerfile: ./Dockerfile
+    ports:
+      - "27017:27017"
+    networks:
+      - utilities-mongodb-network
+  mysql-container:
+    image: project-s-mysql:latest
+    build:
+      context: ./mysql
+      dockerfile: ./Dockerfile
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=Notifications
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    ports:
+      - "3306:3306"
+    networks:
+      - products-mysql-network
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - project-s-network
+
+  rabbitmq:
+    image: rabbitmq:4.2.2-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - project-s-network
+
+  gateway:
+    image: apigateway:latest
+    build:
+      context: .
+      dockerfile: ./ProjectS.Gateway/Dockerfile
+    ports:
+      - "5000:8080"
+    networks:
+      - project-s-network
+    depends_on:
+      - users-microservice
+      - notifications-microservice
+      - utilities-microservice
+
+  users-microservice:
+    image: usersapi:latest
+    build:
+      context: .
+      dockerfile: ./ProjectS.UsersService/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - project-s-network
+      - users-postgres-networks
+    depends_on:
+      - postgres-container
+      - rabbitmq
+      - redis
+    environment:
+      AZURE_BLOB_STORAGE_CONNECTION_STRING: ""
+      AZURE_BLOB_STORAGE_CONTAINER_NAME: "projectsimages"
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: Users
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: user
+      RABBITMQ_PASSWORD: password
+      RABBITMQ_PORT: 5672
+      RABBITMQ_EXCHANGE: user.exchange
+      TokenKey: "LoremipsumdolorsitametconsecteturadipiscingelitCurabiturauctoridmagn\
+        asedegestasNullamquisnequesedrisusmalesuadalaciniaSuspendisseaciniaerat\
+        necexfacilisisinvenenatissapiencondimentumDonecacexacipsumluctuseleifen\
+        d"
+  notifications-microservice:
+    image: notificationsapi:latest
+    build:
+      context: .
+      dockerfile: ./ProjectS.NotificationsService/Dockerfile
+    ports:
+      - "8081:8081"
+    networks:
+      - project-s-network
+      - products-mysql-network
+    depends_on:
+      - mysql-container
+      - rabbitmq
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_DATABASE: Notifications
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: user
+      RABBITMQ_PASSWORD: password
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERS_EXCHANGE: user.exchange
+  utilities-microservice:
+    image: utilitiesapi:latest
+    build:
+      context: .
+      dockerfile: ./ProjectS.UtilitiesService/Dockerfile
+    ports:
+      - "8082:8082"
+    networks:
+      - project-s-network
+      - utilities-mongodb-network
+    depends_on:
+      - mongodb-container
+      - rabbitmq
+    environment:
+      USERS_MICROSERVICE_NAME: users.api
+      USERS_MICROSERVICE_PORT: 8080
+      MONGODB_DATABASE: Utilities
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: user
+      RABBITMQ_PASSWORD: password
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERS_EXCHANGE: user.exchange
+
+networks:
+  project-s-network:
+    driver: bridge
+  users-postgres-networks:
+    driver: bridge
+  utilities-mongodb-network:
+    driver: bridge
+  products-mysql-network:
+    driver: bridge

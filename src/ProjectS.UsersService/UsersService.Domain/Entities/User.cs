@@ -15,7 +15,7 @@ public class User : AggregateRoot
 
     private User() { } // required for ORM
 
-    public User(Guid avatarId, Email email, string userName, string passwordHash)
+    public User(Guid? avatarId, Email email, string userName, string passwordHash)
     {
         Id = Guid.NewGuid();
         AvatarId = avatarId;

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifications-microservice-deployment
+  namespace: project-s-namespace
+  labels:
+    app: notifications-microservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notifications-microservice
+  template:
+    metadata:
+      labels:
+        app: notifications-microservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: notifications-microservice
+          image: projectscontainerregistry.azurecr.io/notificationsapi:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: MYSQL_HOST
+              value: mysql
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: MYSQL_DATABASE
+              value: Notifications
+            - name: MYSQL_USER
+              value: root
+            - name: MYSQL_PASSWORD
+              value: admin
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USERNAME
+              value: user
+            - name: RABBITMQ_PASSWORD
+              value: password
+            - name: RABBITMQ_USERS_EXCHANGE
+              value: user.exchange
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+              ephemeral-storage: 1Gi
+            limits:
+              cpu: "1"
+              memory: 1Gi
