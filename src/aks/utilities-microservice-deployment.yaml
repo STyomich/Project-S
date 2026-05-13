@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utilities-microservice-deployment
+  namespace: project-s-namespace
+  labels:
+    app: utilities-microservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: utilities-microservice
+  template:
+    metadata:
+      labels:
+        app: utilities-microservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: utilities-microservice
+          image: projectscontainerregistry.azurecr.io/utilitiesapi:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: MONGODB_HOST
+              value: mongodb
+            - name: MONGODB_PORT
+              value: "27017"
+            - name: MONGODB_DATABASE
+              value: OrdersDatabase
+            - name: UsersMicroservicePort
+              value: "8080"
+            - name: USERS_MICROSERVICE_NAME
+              value: apigateway
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USERNAME
+              value: user
+            - name: RABBITMQ_PASSWORD
+              value: password
+            - name: RABBITMQ_USERS_EXCHANGE
+              value: user.exchange
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+              ephemeral-storage: 1Gi
+            limits:
+              cpu: "1"
+              memory: 1Gi

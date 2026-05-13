@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-microservice-deployment
+  namespace: project-s-namespace
+  labels:
+    app: users-microservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users-microservice
+  template:
+    metadata:
+      labels:
+        app: users-microservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: users-microservice
+          image: projectscontainerregistry.azurecr.io/usersapi:latest
+          ports:
+            - containerPort: 9090
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: POSTGRES_HOST
+              value: postgres
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DATABASE
+              value: Users
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: admin
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+              ephemeral-storage: 1Gi
+            limits:
+              cpu: "1"
+              memory: 1Gi
