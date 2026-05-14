@@ -20,7 +20,7 @@ spec:
         - name: gateway
           image: projectscontainerregistry.azurecr.io/apigateway:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 5000
           resources:
             requests:
               cpu: 100m
