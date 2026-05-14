@@ -32,7 +32,7 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton<IEventBus, RabbitMQEventBus>();
 
         services.AddScoped<INotificationsRepository, NotificationsRepository>();
-        services.AddTransient<IEventConsumer<UserUpdatedEmailEvent>, UserUpdatedEmailConsumer>();
+        services.AddScoped<IEventConsumer<UserUpdatedEmailEvent>, UserUpdatedEmailConsumer>();
 
         services.AddHostedService<UserUpdatedEmailHostedService>();
 
